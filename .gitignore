@@ -40,6 +40,12 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+/async-demo/node_modules/*
+/express-demo/node_modules/*
+/lion-lib/node_modules/*
+node_modules/*
+/npm-demo/node_modules/*
+/vidly/node_modules/*
 
 # TypeScript v1 declaration files
 typings/
