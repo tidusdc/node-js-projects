@@ -1,35 +1,17 @@
-const Joi = require('joi');
+
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const {Genre,validate} = require('../models/genres');
 
-mongoose.connect('mongodb://localhost/playground')
-    .then( () => console.log('Connected to MongoDB...'))
-    .catch( err => console.error('Could not connect to MongoDB', err));
-
-const genreSchema = new mongoose.Schema({
-    id: {
-        type: Number,
-        required: true
-     },
-    name: { 
-        type: String, 
-        required: true,
-        minlength: 5,
-        maxlength: 255,
-    }
-     
-});
-    
-const Genre = mongoose.model('Genre', genreSchema);
 
 async function createGenre( id, name) {
-    const genre = new Genre({
+    let genre = new Genre({
         id:id,
         name: name
     });
     try {
-        const result = await genre.save();
+        genre = await genre.save();
         console.log(result);
     } catch(err) {
         for(field in err.errors)
@@ -37,17 +19,6 @@ async function createGenre( id, name) {
     }
     return genre;
 }
-//createGenre();
-
-
-
-const genres = [
-    { id: 1, name: 'Action' },  
-    { id: 2, name: 'Horror' },  
-    { id: 3, name: 'Romance' },  
-    { id: 4, name: 'Drama '}
-];
-
 
 async function updateGenre( id, name ) {
     // Query first
@@ -83,9 +54,6 @@ async function getGenres() {
     .sort({ name: 1 })
   return genres;
 }
-
-
-
 
 async function getGenre(id) {
     // eq (equal
@@ -141,13 +109,10 @@ router.get( '/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    const { error } = validategenre( req.body );
+    const { error } = validate( req.body );
     // Validate
     // If Invalid, return 400 - Bad Request
-
     if( error ) return res.status(400).send(error.details[0].message);
-   
- 
     const updateResult = await createGenre( req.body.id, req.body.name );
     console.dir(`POST Request : Genre Added ${updateResult}`);
 
@@ -168,7 +133,7 @@ router.put( '/:id', async (req, res) => {
     // Look up the genre 
     // If no existing, return 404
     //const genre = genres.find( c => c.id === parseInt(req.params.id) );
-    const { error } = validategenre( req.body );
+    const { error } = validate( req.body );
     // Validate
     // If Invalid, return 400 - Bad Request
     if( error ) return res.status(400).send(error.details[0].message);
@@ -194,12 +159,5 @@ router.delete( '/:id', async (req, res) => {
     res.send(deleteResult);
 
 });
-
-function validategenre(genre) {
-    const schema = Joi.object({
-        name: Joi.string().min(3).required()
-    });
-    return schema.validate(genre);
-}
 
 module.exports = router;
